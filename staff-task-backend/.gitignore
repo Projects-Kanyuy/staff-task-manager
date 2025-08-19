@@ -1,5 +1,6 @@
 node_modules
 .env
+.seeder.js
 # Logs
 logs
 *.log

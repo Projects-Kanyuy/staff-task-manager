@@ -1,5 +1,6 @@
-// src/pages/StaffHistoryPage.js
-import React, { useState, useEffect, useCallback } from 'react';
+// frontend/src/pages/StaffHistoryPage.js
+
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
 const statusClasses = {
@@ -12,30 +13,27 @@ const StaffHistoryPage = () => {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchHistory = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { data } = await api.get('/reports/myreports');
-      setHistory(data);
-    } catch (error) {
-      console.error("Failed to fetch history:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await api.get('/reports/myhistory');
+        setHistory(response.data);
+      } catch (error) {
+        console.error("Failed to fetch history:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchHistory();
   }, []);
 
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
-
   if (isLoading) {
-    return <div className="text-center text-xl mt-10">Loading your history...</div>;
+    return <div className="text-center p-8 text-gray-400">Loading your submission history...</div>;
   }
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">My Submission History</h1>
-      
       <div className="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-x-auto">
         {history.length > 0 ? (
           <table className="w-full text-left">
@@ -50,8 +48,9 @@ const StaffHistoryPage = () => {
             <tbody>
               {history.map((item) => (
                 <tr key={item._id} className="border-t border-gray-700 hover:bg-gray-800">
-                  <td className="p-4 font-medium">{item.taskId ? item.taskId.title : 'Deleted Task'}</td>
-                  <td className="p-4 text-gray-400">{new Date(item.submittedAt).toLocaleDateString()}</td>
+                  <td className="p-4 font-medium">{item.taskId?.title || 'Task Deleted'}</td>
+                  {/* --- THIS IS THE UPDATED LINE --- */}
+                  <td className="p-4 text-gray-400">{new Date(item.submittedAt).toLocaleString()}</td>
                   <td className="p-4">
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${statusClasses[item.status]}`}>
                       {item.status.replace('_', ' ').toUpperCase()}
@@ -63,7 +62,10 @@ const StaffHistoryPage = () => {
             </tbody>
           </table>
         ) : (
-          <p className="text-gray-400 text-center py-8">You have no submission history yet.</p>
+          <div className="text-center p-12">
+            <h3 className="text-xl font-bold text-white">No History Found</h3>
+            <p className="text-gray-400 mt-2">You have no submission history yet.</p>
+          </div>
         )}
       </div>
     </div>

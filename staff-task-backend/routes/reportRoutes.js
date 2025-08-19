@@ -1,3 +1,5 @@
+// backend/routes/reportRoutes.js
+
 const express = require('express');
 const router = express.Router();
 const { protect, isManager } = require('../middleware/authMiddleware');
@@ -6,23 +8,19 @@ const {
     createReport, 
     getReports, 
     getMyReports, 
-    getReportCount // --- IMPORT NEW FUNCTION ---
+    getReportCount
 } = require('../controllers/reportController');
 
+// All report routes are protected
 router.use(protect);
 
-// == STAFF ROUTES ==
+// Staff-specific routes
 router.post('/', uploadCloudinary.single('screenshot'), createReport);
-router.get('/myreports', getMyReports);
+router.get('/myhistory', getMyReports);
 
-// == MANAGER ROUTES ==
-router.use(isManager);
-
-// GET /api/reports - Get paginated reports
-router.get('/', getReports);
-
-// --- NEW ROUTE ---
-// GET /api/reports/count - Get total report count
-router.get('/count', getReportCount);
+// Manager-specific routes
+// These routes will first check for login (protect), then check for manager role (isManager)
+router.get('/', isManager, getReports);
+router.get('/count', isManager, getReportCount);
 
 module.exports = router;

@@ -1,4 +1,5 @@
-// src/components/TaskItem.js
+// frontend/src/components/TaskItem.js
+
 import React from 'react';
 
 const priorityClasses = {
@@ -9,22 +10,26 @@ const priorityClasses = {
 
 const TaskItem = ({ task, onOpenReportModal }) => {
   return (
-    <div className="bg-gray-800/50 border border-gray-700 p-5 rounded-lg shadow-lg flex flex-col justify-between space-y-4">
+    <div className="bg-slate-900/50 border border-purple-500/20 p-5 rounded-xl shadow-lg flex flex-col justify-between space-y-4 hover:border-purple-500/50 transition-colors duration-300">
       <div>
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-bold text-gray-50">{task.title}</h3>
+          <h3 className="text-lg font-bold text-slate-50">{task.title}</h3>
           <span className={`px-2 py-1 text-xs font-semibold rounded-full border ${priorityClasses[task.priority]}`}>
             {task.priority.toUpperCase()}
           </span>
         </div>
-        <p className="text-gray-400 text-sm">{task.description}</p>
+        <p className="text-slate-400 text-sm">{task.description}</p>
       </div>
-      <div className="flex justify-end items-center pt-4 border-t border-gray-700">
+      <div className="flex justify-end items-center pt-4 border-t border-slate-700">
         <button
           onClick={() => onOpenReportModal(task)}
-          className="px-4 py-2 font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:scale-105 transform transition-transform duration-300"
+          disabled={task.hasSubmittedToday}
+          className="px-4 py-2 font-semibold text-white rounded-lg transition-all duration-300
+                     bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transform
+                     shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40
+                     disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none"
         >
-          Submit Report
+          {task.hasSubmittedToday ? 'Submitted' : 'Submit Report'}
         </button>
       </div>
     </div>

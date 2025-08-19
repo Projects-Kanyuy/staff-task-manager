@@ -2,7 +2,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-
+import { Toaster } from 'react-hot-toast';
+import { SocketProvider } from './context/SocketContext';
+import { NotificationProvider } from './context/NotificationContext';
 // Import Pages
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -22,12 +24,34 @@ function App() {
   return (
     // STEP 1: <Router> must be the top-level parent.
     <Router>
+      <Toaster
+            position="top-right"
+            toastOptions={{
+              // Define default options
+              duration: 4000,
+              style: {
+                background: '#363636',
+                color: '#fff',
+              },
+              // Default options for specific types
+              success: {
+                duration: 3000,
+                theme: {
+                  primary: 'green',
+                  secondary: 'black',
+                },
+              },
+            }}
+          />
       {/* STEP 2: <AuthProvider> is now a child of <Router>, so it can use navigation hooks. */}
       <AuthProvider>
+        <SocketProvider>
+          <NotificationProvider>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+           
           
           {/* Protected Staff Routes */}
           <Route path="/staff-dashboard" element={<StaffRoute><MainLayout><StaffDashboard /></MainLayout></StaffRoute>} />
@@ -41,6 +65,8 @@ function App() {
           {/* Default redirect */}
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
+        </NotificationProvider>
+        </SocketProvider>
       </AuthProvider>
     </Router>
   );

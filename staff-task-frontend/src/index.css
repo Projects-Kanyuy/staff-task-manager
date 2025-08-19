@@ -1,10 +1,17 @@
-/* src/index.css */
+/* frontend/src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  background-color: #111827; /* A dark gray-blue */
-  background-image: radial-gradient(circle at top, #1f2937, #111827);
-  color: #f9fafb; /* Default text color to a light gray */
+  /* A deep, dark space-blue background with a subtle radial gradient for depth */
+  background-color: #0f172a; /* slate-900 */
+  background-image: radial-gradient(circle at top, theme('colors.slate.800'), theme('colors.slate.900'));
+  
+  /* A light, cool gray for default text, which is easy on the eyes */
+  color: theme('colors.slate.200');
+  
+  /* Improve font rendering for a sharper, more modern look */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
