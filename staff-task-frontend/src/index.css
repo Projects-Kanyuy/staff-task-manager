@@ -1,0 +1,10 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #111827; /* A dark gray-blue */
+  background-image: radial-gradient(circle at top, #1f2937, #111827);
+  color: #f9fafb; /* Default text color to a light gray */
+}
