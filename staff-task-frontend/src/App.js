@@ -13,12 +13,15 @@ import StaffHistoryPage from './pages/StaffHistoryPage';
 import ManagerTaskPage from './pages/ManagerTaskPage';
 import ManagerReportsPage from './pages/ManagerReportsPage';
 import AdminUserPage from './pages/AdminUserPage'; 
+import AdminDashboard from './pages/AdminDashboard'; 
 
 // Import Components & Layouts
 import StaffRoute from './components/StaffRoute';
 import ManagerRoute from './components/ManagerRoute';
 import MainLayout from './layouts/MainLayout';
 import AdminRoute from './components/AdminRoute';
+import AdminTaskPage from './pages/AdminTaskPage'; // <-- IMPORT
+import AdminReportsPage from './pages/AdminReportsPage'; 
 
 function App() {
   return (
@@ -62,6 +65,9 @@ function App() {
           <Route path="/manager/reports" element={<ManagerRoute><MainLayout><ManagerReportsPage /></MainLayout></ManagerRoute>} />
            {/* Protected Admin Route */}
           <Route path="/admin/users" element={<AdminRoute><MainLayout><AdminUserPage /></MainLayout></AdminRoute>} />
+          <Route path="/admin/dashboard" element={<AdminRoute><MainLayout><AdminDashboard/></MainLayout></AdminRoute>} />
+          <Route path="/admin/tasks" element={<AdminRoute><MainLayout><AdminTaskPage /></MainLayout></AdminRoute>} />
+          <Route path="/admin/reports" element={<AdminRoute><MainLayout><AdminReportsPage /></MainLayout></AdminRoute>} />
           {/* Default redirect */}
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>

@@ -97,3 +97,25 @@ exports.getReportCount = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+exports.getAllReports = async (req, res) => {
+  try {
+    const { filter } = req.query;
+    let query = {};
+
+    if (filter === 'submitted_today') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      query.submittedAt = { $gte: today };
+    }
+
+    const reports = await Report.find(query)
+      .populate('staffId', 'name')
+      .populate('taskId', 'title')
+      .sort({ submittedAt: -1 });
+
+    res.json({ data: reports });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};

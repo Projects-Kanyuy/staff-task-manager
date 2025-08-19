@@ -1,3 +1,5 @@
+// frontend/src/context/AuthContext.js
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -10,21 +12,19 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // On initial app load, check for an existing token
     const token = localStorage.getItem('token');
     if (token) {
       try {
         const decodedUser = jwtDecode(token);
         const isExpired = decodedUser.exp * 1000 < Date.now();
         if (isExpired) {
-          console.log("Token expired, logging out.");
           logout();
         } else {
           setUser(decodedUser.user);
         }
       } catch (error) {
-        console.error("Invalid token found in storage:", error);
-        logout(); // Clear the invalid token
+        console.error("Invalid token:", error);
+        logout();
       }
     }
   }, []);
@@ -36,8 +36,11 @@ export const AuthProvider = ({ children }) => {
     const decodedUser = jwtDecode(token);
     setUser(decodedUser.user);
     
-    // Redirect based on the user's role
-    if (decodedUser.user.role === 'manager' || decodedUser.user.role === 'admin') {
+    // --- THIS IS THE CORRECTED REDIRECTION LOGIC ---
+    // It now has a specific case for the 'admin' role.
+    if (decodedUser.user.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (decodedUser.user.role === 'manager') {
       navigate('/manager/tasks');
     } else {
       navigate('/staff-dashboard');
@@ -46,7 +49,6 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     await api.post('/auth/register', userData);
-    alert('Registration successful! Please log in.');
     navigate('/login');
   };
 
@@ -61,7 +63,6 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook for easy access to the context
 export const useAuth = () => {
   return useContext(AuthContext);
 };

@@ -3,29 +3,34 @@
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HiEye, HiEyeOff } from 'react-icons/hi'; // <-- Import the icons
+import { HiEye, HiEyeOff } from 'react-icons/hi';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login, isAuthenticated, user } = useAuth();
-  
-  // --- ADD THIS STATE ---
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      await login(email, password);
+      await login(email, password); // This will redirect correctly on fresh login
     } catch (err) {
       setError('Invalid credentials. Please try again.');
     }
   };
   
+  // --- THIS IS THE CORRECTED LOGIC ---
+  // This logic runs if you are already logged in and visit the login page.
   if (isAuthenticated) {
-    const targetDashboard = user.role === 'manager' || user.role === 'admin' ? '/manager/tasks' : '/staff-dashboard';
+    let targetDashboard = '/staff-dashboard'; // Default for staff
+    if (user.role === 'admin') {
+      targetDashboard = '/admin/users';
+    } else if (user.role === 'manager') {
+      targetDashboard = '/manager/tasks';
+    }
     return <Navigate to={targetDashboard} />;
   }
 
@@ -45,19 +50,17 @@ const LoginPage = () => {
               required
             />
           </div>
-          
-          {/* --- THIS IS THE UPDATED PASSWORD FIELD --- */}
           <div>
             <label className="block text-sm font-medium text-slate-300">Password</label>
             <div className="relative mt-1">
               <input
-                type={showPassword ? 'text' : 'password'} // Dynamically change type
+                type={showPassword ? 'text' : 'password'}
                 value={password} onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 text-slate-200 bg-slate-800/50 border border-slate-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300"
                 required
               />
               <button
-                type="button" // Important to prevent form submission
+                type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-200"
               >
@@ -65,7 +68,6 @@ const LoginPage = () => {
               </button>
             </div>
           </div>
-          
           {error && <p className="text-sm text-center text-red-500">{error}</p>}
           <div>
             <button

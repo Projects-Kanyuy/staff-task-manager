@@ -8,8 +8,10 @@ const {
     createReport, 
     getReports, 
     getMyReports, 
-    getReportCount
+    getReportCount,
+    getAllReports
 } = require('../controllers/reportController');
+const { isAdmin } = require('../middleware/adminMiddleware');
 
 // All report routes are protected
 router.use(protect);
@@ -22,5 +24,7 @@ router.get('/myhistory', getMyReports);
 // These routes will first check for login (protect), then check for manager role (isManager)
 router.get('/', isManager, getReports);
 router.get('/count', isManager, getReportCount);
+// Route to get all reports (for admin or manager)
+router.get('/all', isAdmin, getAllReports);
 
 module.exports = router;

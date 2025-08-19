@@ -7,7 +7,8 @@ const {
     getAllUsers, 
     createUser, 
     updateUser, 
-    deleteUser 
+    deleteUser,
+    getStats
 } = require('../controllers/userController');
 
 // Apply protect and isAdmin middleware to all routes in this file
@@ -16,6 +17,8 @@ router.use(protect, isAdmin);
 router.route('/')
     .get(getAllUsers)
     .post(createUser);
+router.get('/stats', getStats);
+
 
 router.route('/:id')
     .put(updateUser)

@@ -8,42 +8,40 @@ const Report = require('../models/Report');
 // @route   GET /api/tasks
 exports.getTasks = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const { filter } = req.query; // Get the filter from query params
+    let query = {}; // Start with an empty query object
 
-    const totalTasks = await Task.countDocuments({});
-    const totalPages = Math.ceil(totalTasks / limit);
+    // Apply filters based on the query parameter
+    if (filter === 'created_today') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      query.createdAt = { $gte: today };
+    } else if (filter === 'overdue') {
+      query.dueDate = { $lt: new Date() };
+    }
 
-    // 1. Fetch the paginated list of tasks
-    const tasks = await Task.find({})
+    const tasks = await Task.find(query) // Use the dynamic query object
       .populate('assigneeIds', 'name')
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .skip(skip);
+      .sort({ createdAt: -1 });
 
-    // 2. Efficiently check which of these tasks have reports
     const taskIds = tasks.map(t => t._id);
     const reports = await Report.find({ taskId: { $in: taskIds } }).select('taskId');
     const reportedTaskIds = new Set(reports.map(r => r.taskId.toString()));
 
-    // 3. Add a 'hasBeenReported' flag to each task object
     const tasksWithReportStatus = tasks.map(task => ({
       ...task.toObject(),
       hasBeenReported: reportedTaskIds.has(task._id.toString())
     }));
       
     res.json({
-      data: tasksWithReportStatus, // Send the enhanced data
-      currentPage: page,
-      totalPages: totalPages,
+      data: tasksWithReportStatus,
+      // Note: Pagination is removed for filtered views for simplicity, can be added back
     });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 };
-
 // @desc    Create a task
 // @route   POST /api/tasks
 exports.createTask = async (req, res) => {

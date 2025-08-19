@@ -1,4 +1,4 @@
-// frontend/src/pages/ManagerReportsPage.js
+// frontend/src/pages/AdminReportsPage.js
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -7,7 +7,7 @@ import ReportCard from '../components/ReportCard';
 import ImageViewerModal from '../components/ImageViewerModal';
 import api from '../services/api';
 
-const ManagerReportsPage = () => {
+const AdminReportsPage = () => {
   const [reports, setReports] = useState([]);
   const [staffUsers, setStaffUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +43,6 @@ const ManagerReportsPage = () => {
   };
 
   const filteredReports = useMemo(() => {
-    // Manual filtering is now secondary to the initial load filter
     return reports.filter(report => {
       const staffMatch = !filters.staffId || report.staffId._id === filters.staffId;
       const dateMatch = !filters.date || new Date(report.submittedAt).toISOString().startsWith(filters.date);
@@ -52,14 +51,14 @@ const ManagerReportsPage = () => {
   }, [reports, filters]);
   
   const clearFilter = () => {
-    navigate('/manager/reports');
+    navigate('/admin/reports'); // Navigate to the admin route
   };
 
   if (isLoading) { return <div className="text-center p-8 text-slate-400">Loading reports...</div>; }
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 text-slate-50">Staff Reports</h1>
+      <h1 className="text-3xl font-bold mb-6 text-slate-50">Global Staff Reports</h1>
 
       {initialFilter && (
         <div className="mb-6 flex items-center justify-between bg-slate-800/50 p-3 rounded-lg">
@@ -72,9 +71,18 @@ const ManagerReportsPage = () => {
         </div>
       )}
 
-      {/* Filter Section */}
       <div className="bg-slate-900/50 border border-purple-500/20 p-4 rounded-xl mb-6 flex items-center gap-4">
-        {/* ... Filter select and date inputs ... */}
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-slate-300 mb-1">Filter by Staff</label>
+          <select name="staffId" value={filters.staffId} onChange={handleFilterChange} className="w-full px-4 py-2 text-slate-200 bg-slate-800/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <option value="">All Staff</option>
+            {staffUsers.map(staff => <option key={staff._id} value={staff._id}>{staff.name}</option>)}
+          </select>
+        </div>
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-slate-300 mb-1">Filter by Date</label>
+          <input type="date" name="date" value={filters.date} onChange={handleFilterChange} className="w-full px-4 py-2 text-slate-200 bg-slate-800/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -91,4 +99,4 @@ const ManagerReportsPage = () => {
   );
 };
 
-export default ManagerReportsPage;
+export default AdminReportsPage;

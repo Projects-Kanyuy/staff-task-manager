@@ -2,13 +2,14 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { HiViewGrid, HiDocumentReport, HiClipboardList } from 'react-icons/hi';
+import { HiChartPie, HiUsers, HiViewGrid, HiDocumentReport, HiClipboardList } from 'react-icons/hi';
 import NotificationHandler from '../components/NotificationHandler';
 import NotificationBell from '../components/NotificationBell';
-import ProfileDropdown from '../components/ProfileDropdown'; // <-- IMPORT THE NEW COMPONENT
+import ProfileDropdown from '../components/ProfileDropdown';
 
 const MainLayout = ({ children }) => {
   const location = useLocation();
+  const isAdminView = location.pathname.startsWith('/admin');
   const isManagerView = location.pathname.startsWith('/manager');
   const isStaffView = location.pathname.startsWith('/staff');
   
@@ -38,14 +39,19 @@ const MainLayout = ({ children }) => {
                 <NavLink to="/manager/reports" className={navLinkClasses}><HiDocumentReport className="h-5 w-5" />Reports Dashboard</NavLink>
               </div>
             )}
+            {isAdminView && (
+              <div className="hidden md:flex items-center gap-4">
+                <NavLink to="/admin/dashboard" className={navLinkClasses}><HiChartPie className="h-5 w-5" />Dashboard</NavLink>
+                <NavLink to="/admin/users" className={navLinkClasses}><HiUsers className="h-5 w-5" />User Management</NavLink>
+                <NavLink to="/admin/tasks" className={navLinkClasses}><HiViewGrid className="h-5 w-5" />All Tasks</NavLink>
+                <NavLink to="/admin/reports" className={navLinkClasses}><HiDocumentReport className="h-5 w-5" />All Reports</NavLink>
+              </div>
+            )}
           </div>
-          
-          {/* --- THIS IS THE UPDATED SECTION --- */}
           <div className="flex items-center gap-4">
             <NotificationBell />
-            <ProfileDropdown /> {/* <-- The new component replaces the old buttons */}
+            <ProfileDropdown />
           </div>
-          
         </nav>
       </header>
       <main className="container mx-auto px-6 py-8">
