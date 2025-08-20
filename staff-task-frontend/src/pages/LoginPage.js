@@ -16,26 +16,23 @@ const LoginPage = () => {
     e.preventDefault();
     setError('');
     try {
-      await login(email, password); // This will redirect correctly on fresh login
+      await login(email, password);
     } catch (err) {
       setError('Invalid credentials. Please try again.');
     }
   };
   
-  // --- THIS IS THE CORRECTED LOGIC ---
-  // This logic runs if you are already logged in and visit the login page.
   if (isAuthenticated) {
-    let targetDashboard = '/staff-dashboard'; // Default for staff
-    if (user.role === 'admin') {
-      targetDashboard = '/admin/users';
-    } else if (user.role === 'manager') {
-      targetDashboard = '/manager/tasks';
-    }
+    let targetDashboard = '/staff-dashboard';
+    if (user.role === 'admin') targetDashboard = '/admin/dashboard';
+    else if (user.role === 'manager') targetDashboard = '/manager/tasks';
     return <Navigate to={targetDashboard} />;
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4">
+    // Back to the original futuristic background
+    <div className="flex items-center justify-center min-h-screen bg-slate-900 px-4" style={{ backgroundImage: "radial-gradient(circle at top, #1e293b, #0f172a)"}}>
+      {/* Back to the original frosted glass card */}
       <div className="w-full max-w-md p-8 space-y-8 bg-slate-900/50 backdrop-blur-lg rounded-2xl shadow-2xl border border-purple-500/20">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-slate-50">Welcome Back</h2>
@@ -70,6 +67,7 @@ const LoginPage = () => {
           </div>
           {error && <p className="text-sm text-center text-red-500">{error}</p>}
           <div>
+            {/* Back to the original gradient button */}
             <button
               type="submit"
               className="w-full px-4 py-3 font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:scale-105 transform transition-all duration-300 shadow-lg shadow-purple-500/20 hover:shadow-xl hover:shadow-purple-500/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-blue-500"

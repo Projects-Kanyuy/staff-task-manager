@@ -9,19 +9,18 @@ import { HiUsers, HiClipboardList, HiDocumentReport, HiExclamationCircle } from 
 const StatCard = ({ icon, title, value, color, link }) => (
     <Link 
       to={link} 
-      className={`bg-slate-900/50 border border-${color}-500/20 p-6 rounded-xl shadow-lg flex items-center gap-6
+      className={`bg-base-200 border border-base-300 p-6 rounded-xl shadow-lg flex items-center gap-6
                  transition-all duration-300 hover:scale-105 hover:border-${color}-500/50 hover:shadow-lg hover:shadow-${color}-500/20`}
     >
         <div className={`p-3 rounded-full bg-gradient-to-br from-${color}-500 to-${color}-700 shadow-lg shadow-${color}-500/30`}>
             {icon}
         </div>
         <div>
-            <p className="text-slate-400 text-sm">{title}</p>
-            <p className="text-3xl font-bold text-white">{value}</p>
+            <p className="text-base-content/70 text-sm">{title}</p>
+            <p className="text-3xl font-bold text-base-content">{value}</p>
         </div>
     </Link>
 );
-
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [isLoading, setIsLoading] = useState(true);

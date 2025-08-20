@@ -1,18 +1,31 @@
 const Report = require('../models/Report');
-
+const Task = require('../models/Task');
 exports.createReport = async (req, res) => {
-  const { taskId, status, notes } = req.body;
-
+  // Destructure workLink from the body
+  const { taskId, status, notes, workLink } = req.body;
+  
   try {
     if (!taskId || !status) {
-      return res.status(400).json({ msg: 'Task ID and status are required.' });
+        return res.status(400).json({ msg: 'Task ID and status are required.' });
     }
 
-    const screenshotUrl = req.file ? `/uploads/${req.file.filename}` : 'No screenshot';
-    const newReport = new Report({ taskId, status, notes, staffId: req.user.id, screenshotUrl });
-    const report = await newReport.save();
+    const screenshotUrl = req.file ? req.file.path : null;
+    if (!screenshotUrl) {
+      return res.status(400).json({ msg: 'Please upload a screenshot as proof.' });
+    }
 
-    // --- NOTIFICATION LOGIC ---
+    const newReport = new Report({
+      taskId,
+      status,
+      notes,
+      workLink, // Save the new link field
+      staffId: req.user.id,
+      screenshotUrl,
+    });
+
+    const report = await newReport.save();
+    
+    // --- Notification Logic (unchanged) ---
     const task = await Task.findById(taskId);
     if (task) {
       const creatorId = task.creatorId.toString();

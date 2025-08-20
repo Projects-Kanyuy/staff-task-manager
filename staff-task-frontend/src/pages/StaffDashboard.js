@@ -40,26 +40,32 @@ const StaffDashboard = () => {
   const handleOpenTaskModal = () => setIsTaskModalOpen(true);
   const handleCloseTaskModal = () => setIsTaskModalOpen(false);
 
-  const handleReportSubmit = async (reportData) => {
+const handleReportSubmit = async (reportData) => {
     if (!selectedTask) return;
 
     const formData = new FormData();
     formData.append('taskId', selectedTask._id);
     formData.append('status', reportData.status);
     formData.append('notes', reportData.notes);
+    
+    // --- ADD THE WORK LINK TO THE FORM DATA ---
+    if (reportData.workLink) {
+      formData.append('workLink', reportData.workLink);
+    }
+    
     if (reportData.screenshot) {
       formData.append('screenshot', reportData.screenshot);
+    } else {
+      // The backend now requires a screenshot
+      return toast.error("A screenshot is required to submit a report.");
     }
 
     try {
-      await api.post('/reports', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      await api.post('/reports', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       toast.success(`Report for "${selectedTask.title}" submitted!`);
       handleCloseReportModal();
-      fetchTasks(); // Refetch tasks to update the button state
+      fetchTasks();
     } catch (error) {
-      console.error('Failed to submit report:', error);
       const errorMessage = error.response?.data?.msg || 'Could not submit the report.';
       toast.error(`Error: ${errorMessage}`);
     }

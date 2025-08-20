@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { HiChartPie, HiUsers, HiViewGrid, HiDocumentReport, HiClipboardList } from 'react-icons/hi';
+import { HiChartPie, HiUsers, HiViewGrid, HiDocumentReport, HiClipboardList, HiCollection } from 'react-icons/hi';
 import NotificationHandler from '../components/NotificationHandler';
 import NotificationBell from '../components/NotificationBell';
 import ProfileDropdown from '../components/ProfileDropdown';
@@ -31,12 +31,15 @@ const MainLayout = ({ children }) => {
               <div className="hidden md:flex items-center gap-4">
                 <NavLink to="/staff-dashboard" className={navLinkClasses}><HiViewGrid className="h-5 w-5" />Today's Tasks</NavLink>
                 <NavLink to="/staff/history" className={navLinkClasses}><HiClipboardList className="h-5 w-5" />My History</NavLink>
+                <NavLink to="/directory" className={navLinkClasses}><HiCollection className="h-5 w-5" />Directory</NavLink>
               </div>
             )}
             {isManagerView && (
               <div className="hidden md:flex items-center gap-4">
                 <NavLink to="/manager/tasks" className={navLinkClasses}><HiViewGrid className="h-5 w-5" />Task Management</NavLink>
+                 <NavLink to="/manager/users" className={navLinkClasses}><HiUsers className="h-5 w-5" />Staff Management</NavLink>
                 <NavLink to="/manager/reports" className={navLinkClasses}><HiDocumentReport className="h-5 w-5" />Reports Dashboard</NavLink>
+                <NavLink to="/directory" className={navLinkClasses}><HiCollection className="h-5 w-5" />Directory</NavLink>
               </div>
             )}
             {isAdminView && (
@@ -45,6 +48,7 @@ const MainLayout = ({ children }) => {
                 <NavLink to="/admin/users" className={navLinkClasses}><HiUsers className="h-5 w-5" />User Management</NavLink>
                 <NavLink to="/admin/tasks" className={navLinkClasses}><HiViewGrid className="h-5 w-5" />All Tasks</NavLink>
                 <NavLink to="/admin/reports" className={navLinkClasses}><HiDocumentReport className="h-5 w-5" />All Reports</NavLink>
+                <NavLink to="/directory" className={navLinkClasses}><HiCollection className="h-5 w-5" />Directory</NavLink>
               </div>
             )}
           </div>

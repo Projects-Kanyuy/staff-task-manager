@@ -13,6 +13,8 @@ const TaskSchema = new Schema({
     enum: ['low', 'medium', 'high'],
     default: 'medium',
   },
+  startTime: { type: String },
+  endTime: { type: String },
 }, { timestamps: true }); // timestamps adds createdAt and updatedAt automatically
 
 module.exports = mongoose.model('Task', TaskSchema);

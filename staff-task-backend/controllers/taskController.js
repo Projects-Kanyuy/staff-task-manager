@@ -8,10 +8,19 @@ const Report = require('../models/Report');
 // @route   GET /api/tasks
 exports.getTasks = async (req, res) => {
   try {
-    const { filter } = req.query; // Get the filter from query params
-    let query = {}; // Start with an empty query object
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    // Apply filters based on the query parameter
+    // --- ADVANCED FILTERING LOGIC ---
+    const { filter, priority, assignee, sort } = req.query;
+    let query = {};
+
+    // Build the query object based on provided filters
+    if (priority) query.priority = priority;
+    if (assignee) query.assigneeIds = assignee;
+    
+    // Date-based filters from the dashboard cards
     if (filter === 'created_today') {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -19,10 +28,22 @@ exports.getTasks = async (req, res) => {
     } else if (filter === 'overdue') {
       query.dueDate = { $lt: new Date() };
     }
+    
+    // --- SORTING LOGIC ---
+    let sortOptions = { createdAt: -1 }; // Default sort: newest first
+    if (sort === 'dueDateAsc') sortOptions = { dueDate: 1 };
+    if (sort === 'dueDateDesc') sortOptions = { dueDate: -1 };
+    if (sort === 'priority') sortOptions = { priority: -1 };
 
-    const tasks = await Task.find(query) // Use the dynamic query object
+    // --- Database Query ---
+    const totalTasks = await Task.countDocuments(query);
+    const totalPages = Math.ceil(totalTasks / limit);
+
+    const tasks = await Task.find(query)
       .populate('assigneeIds', 'name')
-      .sort({ createdAt: -1 });
+      .sort(sortOptions)
+      .limit(limit)
+      .skip(skip);
 
     const taskIds = tasks.map(t => t._id);
     const reports = await Report.find({ taskId: { $in: taskIds } }).select('taskId');
@@ -35,7 +56,8 @@ exports.getTasks = async (req, res) => {
       
     res.json({
       data: tasksWithReportStatus,
-      // Note: Pagination is removed for filtered views for simplicity, can be added back
+      currentPage: page,
+      totalPages: totalPages,
     });
   } catch (err) {
     console.error(err.message);
@@ -45,9 +67,8 @@ exports.getTasks = async (req, res) => {
 // @desc    Create a task
 // @route   POST /api/tasks
 exports.createTask = async (req, res) => {
-  const { title, description, assigneeIds, dueDate, priority } = req.body;
+  const { title, description, assigneeIds, dueDate, priority, startTime, endTime } = req.body;
   const creatorId = req.user.id;
-
   try {
     let finalAssignees;
     if (req.user.role === 'staff') {
@@ -57,8 +78,7 @@ exports.createTask = async (req, res) => {
     } else {
       finalAssignees = assigneeIds;
     }
-
-    const newTask = new Task({ title, description, assigneeIds: finalAssignees, dueDate, priority, creatorId });
+    const newTask = new Task({ title, description, assigneeIds: finalAssignees, dueDate, priority, creatorId, startTime, endTime });
     const task = await newTask.save();
 
     // --- NOTIFICATION LOGIC ---
@@ -107,13 +127,19 @@ exports.updateTask = async (req, res) => {
   try {
     let task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ msg: 'Task not found' });
+    
+    // Create an update object from the request body
+    const { title, description, assigneeIds, dueDate, priority, startTime, endTime } = req.body;
+    const updateFields = { title, description, assigneeIds, dueDate, priority, startTime, endTime };
 
-    task = await Task.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+    task = await Task.findByIdAndUpdate(req.params.id, { $set: updateFields }, { new: true });
     res.json(task);
   } catch (err) {
+    console.error(err.message);
     res.status(500).send('Server Error');
   }
 };
+
 
 // @desc    Delete a task
 // @route   DELETE /api/tasks/:id
@@ -148,31 +174,29 @@ exports.getMyTasks = async (req, res) => {
     // 1. Get all tasks assigned to this user
     const tasks = await Task.find({ assigneeIds: req.user.id });
 
-    // 2. Get the start and end of the current day
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // 2. Get all reports ever submitted by this user
+    const allUserReports = await Report.find({ staffId: req.user.id });
 
-    // 3. Find all reports submitted by this user today
-    const reportsToday = await Report.find({
-      staffId: req.user.id,
-      submittedAt: { $gte: today, $lt: tomorrow },
-    });
-    
-    // 4. Create a simple list of task IDs that have been submitted
-    const submittedTaskIds = new Set(reportsToday.map(report => report.taskId.toString()));
+    // 3. Create a simple string for today's date, e.g., "2024-08-20"
+    // This ignores time and timezones completely.
+    const todayDateString = new Date().toISOString().slice(0, 10);
+
+    // 4. Create a Set of task IDs that have a report submitted on today's calendar date
+    const submittedTaskIdsToday = new Set(
+      allUserReports
+        .filter(report => report.submittedAt.toISOString().slice(0, 10) === todayDateString)
+        .map(report => report.taskId.toString())
+    );
 
     // 5. Add a 'hasSubmittedToday' flag to each task object
-    const tasksWithStatus = tasks.map(task => {
-      return {
-        ...task.toObject(), // Convert from Mongoose object to plain JS object
-        hasSubmittedToday: submittedTaskIds.has(task._id.toString())
-      };
-    });
+    const tasksWithStatus = tasks.map(task => ({
+      ...task.toObject(),
+      hasSubmittedToday: submittedTaskIdsToday.has(task._id.toString())
+    }));
 
     res.json(tasksWithStatus);
-  } catch (err) {
+  } catch (err)
+ {
     console.error(err.message);
     res.status(500).send('Server Error');
   }

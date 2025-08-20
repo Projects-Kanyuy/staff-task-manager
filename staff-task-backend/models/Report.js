@@ -12,6 +12,7 @@ const ReportSchema = new Schema({
   },
   notes: { type: String },
   screenshotUrl: { type: String }, // Path to the uploaded image
+   workLink: { type: String },
   submittedAt: { type: Date, default: Date.now },
 });
 
