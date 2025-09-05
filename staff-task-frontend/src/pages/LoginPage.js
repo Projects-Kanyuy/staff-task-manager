@@ -77,10 +77,10 @@ const LoginPage = () => {
           </div>
         </form>
         <p className="text-sm text-center text-slate-400">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-medium text-blue-400 hover:underline">
+          Don't have an account? Contact your adminstrator{' '}
+          {/*<Link to="/register" className="font-medium text-blue-400 hover:underline">
             Register now
-          </Link>
+          </Link>*/}
         </p>
       </div>
     </div>

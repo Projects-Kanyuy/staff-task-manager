@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import { HiUser, HiLockClosed } from 'react-icons/hi';
+import { HiUser, HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi'; // Import eye icons
 
 const ProfilePage = () => {
-    const { user, login } = useAuth(); // We need login to refresh user state after update
+    const { user } = useAuth();
 
     // State for the profile info form
     const [profileData, setProfileData] = useState({
@@ -22,6 +22,11 @@ const ProfilePage = () => {
         confirmPassword: '',
     });
 
+    // --- NEW: State for showing/hiding each password field ---
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const handleProfileChange = (e) => {
         setProfileData({ ...profileData, [e.target.name]: e.target.value });
     };
@@ -30,7 +35,7 @@ const ProfilePage = () => {
         setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
     };
 
-    const handleProfileSubmit = async (e) => {
+     const handleProfileSubmit = async (e) => {
         e.preventDefault();
         const promise = api.put('/users/profile', profileData);
         toast.promise(promise, {
@@ -95,17 +100,35 @@ const ProfilePage = () => {
                 <div className="bg-slate-900/50 border border-purple-500/20 p-8 rounded-xl shadow-lg">
                     <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3"><HiLockClosed /> Change Password</h2>
                     <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                        {/* --- UPDATED Current Password Field --- */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300">Current Password</label>
-                            <input type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} className="w-full mt-1 px-4 py-2 text-slate-200 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                            <div className="relative mt-1">
+                                <input type={showCurrentPassword ? 'text' : 'password'} name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} className="w-full px-4 py-2 text-slate-200 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                                <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-200">
+                                    {showCurrentPassword ? <HiEyeOff className="h-5 w-5" /> : <HiEye className="h-5 w-5" />}
+                                </button>
+                            </div>
                         </div>
+                        {/* --- UPDATED New Password Field --- */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300">New Password</label>
-                            <input type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} className="w-full mt-1 px-4 py-2 text-slate-200 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                             <div className="relative mt-1">
+                                <input type={showNewPassword ? 'text' : 'password'} name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} className="w-full px-4 py-2 text-slate-200 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                                <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-200">
+                                    {showNewPassword ? <HiEyeOff className="h-5 w-5" /> : <HiEye className="h-5 w-5" />}
+                                </button>
+                            </div>
                         </div>
+                        {/* --- UPDATED Confirm New Password Field --- */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300">Confirm New Password</label>
-                            <input type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} className="w-full mt-1 px-4 py-2 text-slate-200 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                            <div className="relative mt-1">
+                                <input type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} className="w-full px-4 py-2 text-slate-200 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+                                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-200">
+                                    {showConfirmPassword ? <HiEyeOff className="h-5 w-5" /> : <HiEye className="h-5 w-5" />}
+                                </button>
+                            </div>
                         </div>
                         <div className="pt-2">
                             <button type="submit" className="px-5 py-2 font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:scale-105 transform transition-all duration-300">Change Password</button>
