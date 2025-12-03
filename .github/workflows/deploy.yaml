@@ -1,4 +1,4 @@
-name: Deploy CRM Website
+name: Deploy Staff Task Management Website
 
 on:
   push:
@@ -23,8 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       terraform: ${{ steps.filter.outputs.terraform }}
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.staff-task-backend }}
+      frontend: ${{ steps.filter.outputs.staff-task-frontend }}
     steps:
       - uses: actions/checkout@v4
         with:
