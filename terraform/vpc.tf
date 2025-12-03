@@ -50,8 +50,8 @@ resource "aws_security_group" "ecs_tasks_sg" {
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    from_port       = 5001
-    to_port         = 5001
+    from_port       = 5000
+    to_port         = 5000
     protocol        = "tcp"
     security_groups = [aws_security_group.alb_sg.id] # Only ALB can talk to ECS
   }
