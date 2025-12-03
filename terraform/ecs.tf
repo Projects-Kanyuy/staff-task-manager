@@ -26,7 +26,7 @@ resource "aws_ecs_task_definition" "backend" {
       image     = "${aws_ecr_repository.backend.repository_url}:latest"
       essential = true
       portMappings = [
-        { containerPort = var.port, hostPort = var.port, protocol = "tcp" }
+        { containerPort = tonumber(var.port), hostPort = tonumber(var.port), protocol = "tcp" }
       ]
       environment = [
         { name = "PORT", value = var.port }
