@@ -25,14 +25,6 @@ resource "aws_lb_target_group" "ecs_tg" {
     unhealthy_threshold = 5
     matcher             = "200-399"
   }
-  # destroy listeners before destroying the target group
-  depends_on = [
-    aws_lb_listener.ecs_listener_https,
-    aws_lb_listener.ecs_listener_http
-  ]
-  lifecycle {
-    create_before_destroy = false
-  }
   tags = {
     Name = "${var.project_name}-tg"
   }
@@ -69,5 +61,6 @@ resource "aws_lb_listener" "ecs_listener_http" {
       status_code = "HTTP_301"
    }
   }
+  depends_on = [aws_lb_target_group.ecs_tg] 
 }
-##
+
