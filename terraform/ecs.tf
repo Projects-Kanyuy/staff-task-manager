@@ -91,6 +91,13 @@ resource "aws_ecs_service" "backend" {
     container_port   = var.port
   }
 
+  lifecycle {
+    ignore_changes = [
+      load_balancer,
+      task_definition,
+    ]
+  }
+
   health_check_grace_period_seconds = 120
-  depends_on = [aws_lb_listener.ecs_listener_https]
+  depends_on = [aws_lb_listener_rule.ecs_forward_rule, aws_lb_listener.ecs_listener_https]
 }
