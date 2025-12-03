@@ -82,4 +82,9 @@ resource "aws_lb_listener_rule" "ecs_forward_rule" {
       values = ["/*"]
     }
   }
+  depends_on = [aws_lb_target_group.ecs_tg]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
