@@ -1,6 +1,6 @@
 // frontend/src/pages/AdminTaskPage.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { HiPlus, HiPencilAlt, HiTrash, HiX } from 'react-icons/hi';
@@ -30,46 +30,56 @@ const AdminTaskPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const fetchAllData = async (page = 1, currentFilters = {}) => {
+  // 1. Fetch Users separately (Run once on mount)
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersResponse = await api.get('/tasks/staff');
+        setUsers(usersResponse.data);
+      } catch (error) {
+        console.error("Failed to load users");
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // 2. Wrap fetchAllData in useCallback to stabilize it
+  const fetchAllData = useCallback(async (page = 1, currentFilters = {}) => {
     setIsLoading(true);
     try {
       const params = { page, limit: 10, ...currentFilters };
-      // Clean up params by removing empty values before sending to API
+      // Clean up params
       Object.keys(params).forEach(key => (params[key] === '' || params[key] === null) && delete params[key]);
 
       const tasksResponse = await api.get('/tasks', { params });
       setTasks(tasksResponse.data.data);
       setCurrentPage(tasksResponse.data.currentPage);
       setTotalPages(tasksResponse.data.totalPages);
-
-      // Fetch users only if the list is empty to avoid redundant API calls
-      if (users.length === 0) {
-        const usersResponse = await api.get('/tasks/staff');
-        setUsers(usersResponse.data);
-      }
     } catch (error) {
       toast.error("Could not load tasks.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []); // No dependencies needed as 'api' is external and arguments are passed in
 
+  // 3. Effect now depends on location.search and the stable fetchAllData function
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const initialUrlFilter = params.get('filter');
     const newFilters = initialUrlFilter ? { filter: initialUrlFilter } : {};
     setFilters(newFilters);
+    
     fetchAllData(1, newFilters);
-  }, [location.search]);
+  }, [location.search, fetchAllData]);
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
-    fetchAllData(1, newFilters); // Reset to page 1 when filters change
+    fetchAllData(1, newFilters);
   };
 
   const clearFilters = () => {
     setFilters({});
-    navigate('/admin/tasks'); // Clear URL params and trigger refetch via useEffect
+    navigate('/admin/tasks');
   };
 
   const handlePageChange = (newPage) => {
@@ -89,7 +99,7 @@ const AdminTaskPage = () => {
         await api.put(`/tasks/${currentTask._id}`, taskData);
         toast.success('Task updated successfully!');
       }
-      fetchAllData(currentPage, filters); // Refetch current page to show changes
+      fetchAllData(currentPage, filters);
       setIsModalOpen(false);
     } catch (error) {
       toast.error("Error: Could not save the task.");
@@ -101,7 +111,7 @@ const AdminTaskPage = () => {
       try {
         await api.delete(`/tasks/${taskId}`);
         toast.success('Task has been deleted.');
-        fetchAllData(currentPage, filters); // Refetch current page
+        fetchAllData(currentPage, filters);
       } catch (error) {
         toast.error("Error: Could not delete the task.");
       }

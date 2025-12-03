@@ -1,9 +1,10 @@
-// seeder.js
+// backend/seeder.js
+
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const User = require('./models/User'); // Import the User model
 
-dotenv.config();
+dotenv.config({ path: './backend/.env' }); // Make sure it finds the .env file
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -16,30 +17,45 @@ const connectDB = async () => {
     }
 };
 
-// Define the data to be seeded
-const adminUser = {
-    name: 'Admin User',
-    email: 'admin@example.com',
-    password: 'password123', // The User model will automatically hash this
-    role: 'admin',
-};
+// --- MODIFIED DATA: We now use an array for scalability ---
+const usersToSeed = [
+    {
+        name: 'Admin User',
+        email: 'admin@example.com',
+        password: 'password123', // The User model will automatically hash this
+        role: 'admin',
+    },
+    {
+        name: 'Kyrian Admin',
+        email: 'kyrian@example.com',
+        password: 'password123',
+        role: 'admin',
+    }
+];
 
 // Function to import data
 const importData = async () => {
     await connectDB();
     try {
-        // Check if admin user already exists
-        const existingAdmin = await User.findOne({ email: adminUser.email });
-
-        if (existingAdmin) {
-            console.log('Admin user already exists. Skipping import.');
-            return process.exit();
+        const newUsers = [];
+        for (const user of usersToSeed) {
+            const existingUser = await User.findOne({ email: user.email });
+            if (existingUser) {
+                console.log(`User '${user.email}' already exists. Skipping.`);
+            } else {
+                newUsers.push(user);
+            }
         }
 
-        // Create the admin user
-        const createdAdmin = await User.create(adminUser);
+        if (newUsers.length > 0) {
+            // Use insertMany for efficiency if there are new users to add
+            const createdUsers = await User.insertMany(newUsers);
+            console.log('Data Imported! New users created:');
+            createdUsers.forEach(u => console.log(`- ${u.email}`));
+        } else {
+            console.log('All seed users already exist in the database. Nothing to import.');
+        }
 
-        console.log('Data imported! Admin user created:', createdAdmin.email);
         process.exit();
     } catch (error) {
         console.error(`Error importing data: ${error.message}`);
@@ -51,8 +67,9 @@ const importData = async () => {
 const destroyData = async () => {
     await connectDB();
     try {
+        // Be careful: this will delete ALL users
         await User.deleteMany({});
-        console.log('Data Destroyed!');
+        console.log('Data Destroyed! All users have been removed.');
         process.exit();
     } catch (error) {
         console.error(`Error destroying data: ${error.message}`);
@@ -60,7 +77,7 @@ const destroyData = async () => {
     }
 };
 
-// Check for command-line arguments (-i for import, -d for destroy)
+// Check for command-line arguments (-d for destroy)
 if (process.argv[2] === '-d') {
     destroyData();
 } else {

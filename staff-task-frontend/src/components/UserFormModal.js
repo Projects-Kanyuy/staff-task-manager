@@ -1,7 +1,6 @@
 // frontend/src/components/UserFormModal.js
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { HiEye, HiEyeOff } from 'react-icons/hi'; // Import the eye icons
 
 const UserFormModal = ({ isOpen, onClose, onSave, user, mode, creatorRole }) => {

@@ -1,7 +1,7 @@
 // frontend/src/pages/LoginPage.js
 
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 

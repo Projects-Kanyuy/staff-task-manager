@@ -1,6 +1,6 @@
 // frontend/src/pages/ManagerTaskPage.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { HiPlus, HiPencilAlt, HiTrash, HiX } from 'react-icons/hi';
@@ -26,28 +26,39 @@ const ManagerTaskPage = () => {
   const params = new URLSearchParams(location.search);
   const filter = params.get('filter');
 
-  const fetchAllData = async () => {
+  // 1. Fetch Users separately (Run once on mount)
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersResponse = await api.get('/tasks/staff');
+        setUsers(usersResponse.data);
+      } catch (error) {
+        console.error("Failed to load users");
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // 2. Wrap fetchAllData in useCallback and depend on 'filter'
+  const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     try {
       // Pass the filter from the URL to the API call
       const tasksResponse = await api.get('/tasks', { params: { filter } });
       setTasks(tasksResponse.data.data);
-      
-      const usersResponse = await api.get('/tasks/staff');
-      setUsers(usersResponse.data);
-
+      // Users are now fetched in the separate useEffect
     } catch (error) {
       console.error("Failed to fetch data:", error);
       toast.error("Could not load page data.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filter]); // Re-create this function whenever 'filter' changes
 
-  // This effect will run when the component loads, and again if the URL filter changes
+  // 3. Effect simply runs whenever fetchAllData changes (which happens when filter changes)
   useEffect(() => {
     fetchAllData();
-  }, [filter]);
+  }, [fetchAllData]);
 
   const openCreateModal = () => {
     setModalMode('create');
@@ -106,7 +117,7 @@ const ManagerTaskPage = () => {
   };
 
   if (isLoading) {
-    return <div className="text-center p-8 text-slate-400">Loading tasks and users...</div>;
+    return <div className="text-center p-8 text-slate-400">Loading tasks...</div>;
   }
 
   return (
