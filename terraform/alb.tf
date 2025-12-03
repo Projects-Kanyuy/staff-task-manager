@@ -12,7 +12,7 @@ resource "aws_lb" "ecs_alb" {
 
 resource "aws_lb_target_group" "ecs_tg" {
   name        = "${var.project_name}-tg"
-  port        = 5001
+  port        = 5000
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = data.aws_vpc.default.id
