@@ -1,0 +1,8 @@
+aws_region   = "us-east-1"
+bucket_name  = "staff-task-manager-2025"
+environment  = "production"
+project_name = "staff-task-manager"
+ecr_repository_name = "staff-task-manager"
+secrets_arn = "arn:aws:secretsmanager:us-east-1:362954627441:secret:staff-task-manager-Td9KCa"
+acm_certificate_arn = "arn:aws:acm:us-east-1:362954627441:certificate/88457a93-398d-4751-ba70-0a1fb8fbd3ae"
+custom_domain = "constructionpro.site"
