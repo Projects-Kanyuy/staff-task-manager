@@ -41,13 +41,12 @@ resource "aws_lb_listener" "ecs_listener_https" {
   certificate_arn   = var.acm_certificate_arn
 
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.ecs_tg.arn
-  }
-  depends_on = [aws_lb.ecs_alb]  # lifecycle order
-  # This tells Terraform: destroy the listener BEFORE destroying the target group
-  lifecycle {
-    ignore_changes = [default_action]
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Service unavailable"
+      status_code  = "503"
+    }
   }
 }
 
@@ -68,3 +67,19 @@ resource "aws_lb_listener" "ecs_listener_http" {
   } 
 }
 
+# Separate listener rule that attaches TG
+resource "aws_lb_listener_rule" "ecs_forward_rule" {
+  listener_arn = aws_lb_listener.ecs_listener_https.arn
+  priority     = 1
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ecs_tg.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+}
