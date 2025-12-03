@@ -44,6 +44,11 @@ resource "aws_lb_listener" "ecs_listener_https" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.ecs_tg.arn
   }
+  depends_on = [aws_lb.ecs_alb]  # lifecycle order
+  # This tells Terraform: destroy the listener BEFORE destroying the target group
+  lifecycle {
+    ignore_changes = [default_action]
+  }
 }
 
 # Optional: redirect HTTP (port 80) to HTTPS
@@ -60,7 +65,6 @@ resource "aws_lb_listener" "ecs_listener_http" {
       port     = "443"
       status_code = "HTTP_301"
    }
-  }
-  depends_on = [aws_lb_target_group.ecs_tg] 
+  } 
 }
 
