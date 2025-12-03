@@ -30,3 +30,7 @@ variable "custom_domain" {
   description = "The custom domain for CloudFront"
   type        = string
 }
+variable "port" {
+  description = "The port for backend service"
+  type        = string
+}

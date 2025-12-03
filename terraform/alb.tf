@@ -12,7 +12,7 @@ resource "aws_lb" "ecs_alb" {
 
 resource "aws_lb_target_group" "ecs_tg" {
   name        = "${var.project_name}-tg"
-  port        = 5000
+  port        = var.port
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = data.aws_vpc.default.id
@@ -24,6 +24,17 @@ resource "aws_lb_target_group" "ecs_tg" {
     healthy_threshold   = 2
     unhealthy_threshold = 5
     matcher             = "200-399"
+  }
+  # destroy listeners before destroying the target group
+  depends_on = [
+    aws_lb_listener.ecs_listener_https,
+    aws_lb_listener.ecs_listener_http
+  ]
+  lifecycle {
+    create_before_destroy = false
+  }
+  tags = {
+    Name = "${var.project_name}-tg"
   }
 }
 

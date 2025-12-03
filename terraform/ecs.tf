@@ -26,10 +26,10 @@ resource "aws_ecs_task_definition" "backend" {
       image     = "${aws_ecr_repository.backend.repository_url}:latest"
       essential = true
       portMappings = [
-        { containerPort = 5000, hostPort = 5000, protocol = "tcp" }
+        { containerPort = var.port, hostPort = var.port, protocol = "tcp" }
       ]
       environment = [
-        { name = "PORT", value = "5000" }
+        { name = "PORT", value = var.port }
       ]
       secrets = [
         {
@@ -88,7 +88,7 @@ resource "aws_ecs_service" "backend" {
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_tg.arn
     container_name   = "backend"
-    container_port   = 5001
+    container_port   = var.port
   }
 
   health_check_grace_period_seconds = 120
