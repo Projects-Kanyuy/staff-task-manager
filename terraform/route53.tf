@@ -6,6 +6,7 @@ resource "aws_route53_record" "cloudfront_alias" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = var.custom_domain
   type    = "A"
+  depends_on = [aws_cloudfront_distribution.cdn]
 
   alias {
     name                   = aws_cloudfront_distribution.cdn.domain_name
@@ -17,6 +18,7 @@ resource "aws_route53_record" "www_cloudfront_alias" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = "www.${var.custom_domain}"
   type    = "A"
+  depends_on = [aws_cloudfront_distribution.cdn]
 
   alias {
     name                   = aws_cloudfront_distribution.cdn.domain_name
@@ -28,6 +30,7 @@ resource "aws_route53_record" "api_alias" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = "api.${var.custom_domain}"
   type    = "A"
+  depends_on = [aws_lb.ecs_alb]
 
   alias {
     name                   = aws_lb.ecs_alb.dns_name

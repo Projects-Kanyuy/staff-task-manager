@@ -48,6 +48,7 @@ resource "aws_security_group" "ecs_tasks_sg" {
   name_prefix = "${var.project_name}-ecs-tasks-sg-"
   description = "Allow traffic from the ALB to ECS tasks"
   vpc_id      = data.aws_vpc.default.id
+  depends_on = [aws_security_group.alb_sg]
 
   ingress {
     from_port       = var.port

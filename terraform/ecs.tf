@@ -91,5 +91,5 @@ resource "aws_ecs_service" "backend" {
     container_port   = var.port
   }
   health_check_grace_period_seconds = 120
-  depends_on = [aws_lb_listener.ecs_listener_https]
+  depends_on = [ aws_lb_listener.ecs_listener_https, aws_lb_listener.ecs_listener_http, aws_lb_target_group.ecs_tg ]
 }
